@@ -6,8 +6,9 @@
 #include "config.h"
 
 #define PIN D1
-#define SERIAL false
-#define HOMIE_SERIAL false
+#define SERIAL true
+#define HOMIE_SERIAL true
+#define CLIENTID "ESP8266Client-"
 
 void isrHandler();
 boolean reconnect();
@@ -22,7 +23,7 @@ uint8_t flag_motion = 0;
 uint8_t flag_heartBeat = 0;
 uint8_t oldState = 0;
 unsigned long lastReconnectAttempt = 0;
-String ClientID;
+string ClientID;
 Ticker heartBeat;
 
 void setup() {
@@ -34,8 +35,7 @@ void setup() {
                 delay(500);
                 if(SERIAL) if(SERIAL) Serial.print(".");
         }
-        while (!Serial)
-                ;
+        while (!Serial);
         if(SERIAL) if(SERIAL) Serial.println("");
         if(SERIAL) if(SERIAL) Serial.print("Connected, IP address: ");
         if(SERIAL) if(SERIAL) Serial.println(WiFi.localIP());
@@ -44,15 +44,15 @@ void setup() {
 
         HomieDevice homieDevice = HomieDevice(DEVICE_NAME, "Bewegungsmelder", WiFi.localIP().toString().c_str(),
                                               WiFi.macAddress().c_str(), FW_NAME, FW_VERSION,
-                                              "esp8266", "60");
+                                              "esp8266", "");
         HomieNode pirNode = HomieNode("pir-sensor", "Motion Sensor", "Generic PIR");
         HomieProperties motion = HomieProperties("motion", "Motion",
-                                                 false, true, "",
+                                                 false, true, "60",
                                                  homie::boolean_t);
         pirNode.addProp(motion);
         homieDevice.addNode(pirNode);
         homieCTRL.setDevice(homieDevice);
-
+        ClientID = string(CLIENTID) + DEVICE_NAME;
         attachInterrupt(digitalPinToInterrupt(PIN), isrHandler, CHANGE);
         heartBeat.attach(55.0, heartBeatHandler);
 }
